@@ -1,0 +1,94 @@
+﻿<Window x:Class="MicroLedSimulator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MicroLedSimulator"
+        xmlns:vm="clr-namespace:MicroLedSimulator.ViewModels"
+        xmlns:ctrl="clr-namespace:MicroLedSimulator.Controls.CameraFrameControl"
+    mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel, IsDesignTimeCreatable=True}"
+        Title="MicroLED 設備模擬器" Height="720" Width="1024"
+        MinHeight="600" MinWidth="800">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Margin="0,0,10,0" Width="250">
+            <TextBlock Text="模式選擇：" FontWeight="Bold"/>
+            <ComboBox ItemsSource="{Binding Source={x:Static local:EnumComboBoxHelper.CameraModeItemsSource}}"
+                      SelectedValue="{Binding SelectedMode}"
+                SelectedValuePath="Value" DisplayMemberPath="Display" Margin="0,5,0,10"/>
+
+                <TextBlock Text="晶粒參數 (µm)：" FontWeight="Bold"/>
+                <Grid Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="寬度：" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DieWidthUmText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,2" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="高度：" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DieHeightUmText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,2" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="間距：" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DieSpacingUmText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,2" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+                </Grid>
+                <Button Content="更新晶粒" Command="{Binding UpdateDiesUserCommand}" Margin="0,10,0,10"/>
+
+                <TextBlock Text="藍膜位置 (mm)：" FontWeight="Bold"
+                       Visibility="{Binding IsSimulationMode, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Grid Visibility="{Binding IsSimulationMode, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,5,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="X：" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding BlueFilmDisplayX_mm}" Margin="0,2"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Y：" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding BlueFilmDisplayY_mm}" Margin="0,2"/>
+                </Grid>
+
+                <Button Content="選擇靜態圖片..." Command="{Binding SelectImageCommand}" Margin="0,5,0,10"
+                    Visibility="{Binding IsStaticImageMode, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,10"
+                        Visibility="{Binding IsRealTimeMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="即時饋送：" VerticalAlignment="Center"/>
+                    <CheckBox IsChecked="{Binding IsRealTimeFeedActive}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,10,0,0" MinHeight="40"/>
+        </StackPanel>
+
+        <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1">
+            <Viewbox Stretch="Uniform">
+                <ctrl:CameraFrameControl
+                    CurrentAppMode="{Binding SelectedMode}"
+                    FilmX="{Binding FilmXForControl}"
+                    FilmY="{Binding FilmYForControl}"
+                    DiesToRender="{Binding DiesForControl}"
+                    LogicalDieWidthMm="{Binding DieWidthMmForControl}"
+                    LogicalDieHeightMm="{Binding DieHeightMmForControl}"
+                    />
+            </Viewbox>
+        </Border>
+    </Grid>
+</Window>

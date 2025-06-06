@@ -1,0 +1,51 @@
+{
+    "help": "https://go.microsoft.com/fwlink/?linkid=866610",
+    "root": true,
+    "rules": [
+        // ========== 您需要的ViewModel嵌套规则 ==========
+        {
+            "dependentFilePattern": "{fileName}ViewModel.cs",
+            "filePattern": "{fileName}.xaml",
+            "isDefault": false
+        },
+
+        // ========== 您原有的规则转换 ==========
+        {
+            "dependentFileExtensions": [ ".js" ],
+            "fileExtensions": [ ".coffee", ".iced", ".ts", ".tsx", ".jsx" ]
+        },
+        {
+            "dependentFileExtensions": [ ".css" ],
+            "fileExtensions": [ ".less", ".scss", ".sass", ".styl" ]
+        },
+        {
+            "dependentFileExtensions": [ ".html" ],
+            "fileExtensions": [ ".md", ".mdown", ".markdown", ".mdwn" ]
+        },
+        {
+            "dependentFilePattern": ".map",
+            "fileExtensions": [ ".js", ".css" ]
+        },
+        {
+            "dependentFilePattern": ".svgz",
+            "fileExtensions": [ ".svg" ]
+        },
+        {
+            "dependentFilePattern": ".designer.cs",
+            "fileExtensions": [ ".resx" ]
+        },
+        {
+            "dependentFilePattern": ".cs.d.ts",
+            "fileExtensions": [ ".cs" ]
+        },
+        // 文件到文件规则
+        {
+            "dependentFilePattern": ".bowerrc",
+            "filePattern": "bower.json"
+        },
+        {
+            "dependentFilePattern": ".npmrc",
+            "filePattern": "package.json"
+        }
+    ]
+}

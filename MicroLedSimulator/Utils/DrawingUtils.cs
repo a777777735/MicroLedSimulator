@@ -1,0 +1,22 @@
+﻿using System;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+
+namespace MicroLedSimulator.Utils
+{
+    public static class DrawingUtils
+    {
+        public static uint ColorToUintPbgra(Color color, PixelFormat format)
+        {
+            byte a = color.A; byte r = color.R; byte g = color.G; byte b = color.B;
+            if (format == PixelFormats.Pbgra32) { float alphaFactor = a / 255f; r = (byte)(r * alphaFactor); g = (byte)(g * alphaFactor); b = (byte)(b * alphaFactor); }
+            return (uint)((a << 24) | (r << 16) | (g << 8) | b);
+        }
+        public static unsafe void SetPixelIfValid(WriteableBitmap bmp, int x, int y, uint pbgraOrBgraColor) { if (x >= 0 && x < bmp.PixelWidth && y >= 0 && y < bmp.PixelHeight) { uint* pPixel = (uint*)((byte*)bmp.BackBuffer + y * bmp.BackBufferStride); pPixel[x] = pbgraOrBgraColor; } }
+        public static unsafe void DrawCircleOutlineOnBitmap(WriteableBitmap bmp, int centerX, int centerY, int radius, Color color, int thickness) { if (radius < 0 || thickness <= 0) return; uint lineColor = ColorToUintPbgra(color, bmp.Format); for (int t = 0; t < thickness; t++) { int currentRadius = radius - t; if (currentRadius < 0 && radius > 0) currentRadius = 0; if (currentRadius < 0 && radius == 0 && t > 0) break; int x = currentRadius; int y_coord = 0; int err = 1 - x; if (currentRadius == 0) { SetPixelIfValid(bmp, centerX, centerY, lineColor); if (t == 0 && radius == 0) break; continue; } while (x >= y_coord) { SetPixelIfValid(bmp, centerX + x, centerY + y_coord, lineColor); SetPixelIfValid(bmp, centerX + y_coord, centerY + x, lineColor); SetPixelIfValid(bmp, centerX - y_coord, centerY + x, lineColor); SetPixelIfValid(bmp, centerX - x, centerY + y_coord, lineColor); SetPixelIfValid(bmp, centerX - x, centerY - y_coord, lineColor); SetPixelIfValid(bmp, centerX - y_coord, centerY - x, lineColor); SetPixelIfValid(bmp, centerX + y_coord, centerY - x, lineColor); SetPixelIfValid(bmp, centerX + x, centerY - y_coord, lineColor); y_coord++; if (err < 0) { err += 2 * y_coord + 1; } else { x--; err += 2 * (y_coord - x) + 1; } } } }
+        public static unsafe void DrawFilledCircleOnBitmap(WriteableBitmap bmp, int centerX, int centerY, int radius, Color color) { if (radius < 0) return; uint fillColor = ColorToUintPbgra(color, bmp.Format); for (int y_offset = -radius; y_offset <= radius; y_offset++) { for (int x_offset = -radius; x_offset <= radius; x_offset++) { if (x_offset * x_offset + y_offset * y_offset <= radius * radius) { SetPixelIfValid(bmp, centerX + x_offset, centerY + y_offset, fillColor); } } } }
+        public static unsafe void DrawRectangleOutlineOnBitmap(WriteableBitmap bmp, int x, int y, int width, int height, Color color, int thickness) { if (width <= 0 || height <= 0 || thickness <= 0) return; uint lineColor = ColorToUintPbgra(color, bmp.Format); for (int t = 0; t < thickness; ++t) { for (int i = 0; i < width; ++i) { SetPixelIfValid(bmp, x + i, y + t, lineColor); SetPixelIfValid(bmp, x + i, y + height - 1 - t, lineColor); } for (int i = thickness; i < height - thickness; ++i) { SetPixelIfValid(bmp, x + t, y + i, lineColor); SetPixelIfValid(bmp, x + width - 1 - t, y + i, lineColor); } } }
+        public static unsafe void FillRectangleOnBitmap(WriteableBitmap bmp, int x, int y, int width, int height, Color color) { if (width <= 0 || height <= 0) return; int x_start = Math.Max(0, x); int y_start = Math.Max(0, y); int x_end = Math.Min(bmp.PixelWidth, x + width); int y_end = Math.Min(bmp.PixelHeight, y + height); if (x_start >= x_end || y_start >= y_end) return; int stride = bmp.BackBufferStride; byte* pBase = (byte*)bmp.BackBuffer.ToPointer(); uint pixelColor = ColorToUintPbgra(color, bmp.Format); for (int j = y_start; j < y_end; j++) { uint* pPixelLine = (uint*)(pBase + j * stride); for (int i = x_start; i < x_end; i++) { pPixelLine[i] = pixelColor; } } }
+        public static unsafe void ClearBitmap(WriteableBitmap bmp) { if (bmp == null) return; int stride = bmp.BackBufferStride; IntPtr pBackBuffer = bmp.BackBuffer; long totalBytesToClear = (long)bmp.PixelHeight * stride; byte* pBytes = (byte*)pBackBuffer.ToPointer(); for (long i = 0; i < totalBytesToClear; ++i) { pBytes[i] = 0; } }
+    }
+}

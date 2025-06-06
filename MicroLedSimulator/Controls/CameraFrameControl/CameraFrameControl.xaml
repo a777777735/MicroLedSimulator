@@ -1,0 +1,91 @@
+﻿<UserControl x:Class="MicroLedSimulator.Controls.CameraFrameControl.CameraFrameControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:MicroLedSimulator.Controls.CameraFrameControl"
+             xmlns:vmRoot="clr-namespace:MicroLedSimulator.ViewModels" 
+    xmlns:converters="clr-namespace:MicroLedSimulator.Converters"
+    mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=local:CameraFrameControlViewModel, IsDesignTimeCreatable=True}"
+             Width="{x:Static vmRoot:MainViewModel.CameraPixelWidth}"
+             Height="{x:Static vmRoot:MainViewModel.CameraPixelHeight}"
+             ClipToBounds="True">
+
+    <UserControl.Resources>
+        <!-- 如果 ModeToVisibilityConverter 還未在 App.xaml 中定義，可以在這裡定義 -->
+        <!-- <converters:ModeToVisibilityConverter x:Key="ModeToVisibilityConverter"/> -->
+        <!-- 確保 BooleanToVisibilityConverter 也可以被訪問 -->
+    </UserControl.Resources>
+
+    <UserControl.DataContext>
+        <local:CameraFrameControlViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.ContextMenu>
+        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="小地圖" IsCheckable="True" IsChecked="{Binding IsMinimapVisible, Mode=OneWay}" Command="{Binding ToggleMinimapVisibilityCommand}"/>
+            <Separator />
+            <MenuItem Header="繪製標記">
+                <MenuItem Header="畫圓 (待實作)" IsEnabled="False"/>
+                <MenuItem Header="畫線 (待實作)" IsEnabled="False"/>
+                <MenuItem Header="多邊形 (待實作)" IsEnabled="False"/>
+                <MenuItem Header="文字 (待實作)" IsEnabled="False"/>
+                <MenuItem Header="十字線 (待實作)" IsEnabled="False"/>
+            </MenuItem>
+            <MenuItem Header="測量工具">
+                <MenuItem Header="像素距離 (待實作)" IsEnabled="False"/>
+                <MenuItem Header="角度 (待實作)" IsEnabled="False"/>
+                <MenuItem Header="面積 (待實作)" IsEnabled="False"/>
+            </MenuItem>
+        </ContextMenu>
+    </UserControl.ContextMenu>
+
+    <Grid>
+        <Grid.Background>
+            <DrawingBrush Viewport="0,0,50,50" ViewportUnits="Absolute" TileMode="Tile">
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <GeometryDrawing Brush="White">
+                            <GeometryDrawing.Geometry>
+                                <RectangleGeometry Rect="0,0,50,50" />
+                            </GeometryDrawing.Geometry>
+                        </GeometryDrawing>
+                        <GeometryDrawing>
+                            <GeometryDrawing.Pen>
+                                <Pen Brush="LightGray" Thickness="0.5"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Geometry>
+                                <GeometryGroup>
+                                    <LineGeometry StartPoint="0,0" EndPoint="0,50" />
+                                    <LineGeometry StartPoint="0,0" EndPoint="50,0" />
+                                </GeometryGroup>
+                            </GeometryDrawing.Geometry>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Grid.Background>
+
+        <!-- 假設 CameraFrameControlViewModel 中有 IsSimulationMode 等屬性 -->
+        <!-- 或者使用 CurrentDisplayMode 和 ModeToVisibilityConverter -->
+        <Image Source="{Binding DieLayerSource}" Stretch="Fill"
+               Visibility="{Binding CurrentDisplayMode, ConverterParameter=Simulation, Converter={StaticResource ModeToVisibilityConverter}}"/>
+
+        <!-- 為了簡化，假設 CameraFrameControl 只處理模擬模式的顯示 -->
+        <!-- 如果需要靜態和即時模式，CameraFrameControlViewModel 也需要管理對應的 ImageSource -->
+        <!-- <Image Source="{Binding StaticImageForControl}" Stretch="Fill"
+               Visibility="{Binding CurrentDisplayMode, ConverterParameter=StaticImage, Converter={StaticResource ModeToVisibilityConverter}}"/>
+        <Image Source="{Binding RealTimeImageForControl}" Stretch="Fill"
+               Visibility="{Binding CurrentDisplayMode, ConverterParameter=RealTime, Converter={StaticResource ModeToVisibilityConverter}}"/> -->
+
+        <Border x:Name="MinimapContainerBorder"
+                BorderBrush="DarkGray" BorderThickness="1" Background="#AA000000"
+                Width="{x:Static vmRoot:MainViewModel.MinimapPixelWidth}"
+                Height="{x:Static vmRoot:MainViewModel.MinimapPixelHeight}"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"
+                Visibility="{Binding IsMinimapVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+            <Image x:Name="MinimapImageDisplay" Source="{Binding MinimapSource}" Stretch="Fill" />
+        </Border>
+    </Grid>
+</UserControl>

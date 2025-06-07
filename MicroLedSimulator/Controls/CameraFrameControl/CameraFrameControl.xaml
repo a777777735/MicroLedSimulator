@@ -25,7 +25,7 @@
                 <DataTrigger Binding="{Binding MeasurementResultText}" Value="{x:Null}">
                     <Setter Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding MeasurementResultText, Converter={StaticResource StringIsNullOrEmptyConverter}}}" Value="False">
+                <DataTrigger Binding="{Binding MeasurementResultText, Converter={StaticResource StringIsNullOrEmptyConverter}}" Value="False">
                     <Setter Property="Visibility" Value="Visible"/>
                 </DataTrigger>
             </Style.Triggers>

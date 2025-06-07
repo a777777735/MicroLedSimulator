@@ -120,12 +120,44 @@ namespace MicroLedSimulator.Controls.CameraFrameControl
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            if (DataContext is CameraFrameControlViewModel vm && vm.CurrentDisplayMode == CameraMode.Simulation)
+            if (DataContext is CameraFrameControlViewModel vm)
             {
-                _lastMousePosition = e.GetPosition(this);
-                _isDragging = true;
-                Mouse.Capture(this);
-                e.Handled = true;
+                Point mousePosition = e.GetPosition(this);
+
+                if (vm.ActiveDrawingTool != DrawingToolType.None)
+                {
+                    // For Polygon and Text, Left click adds a point or sets position.
+                    // For other tools (Circle, Line, Crosshair), it also uses AddDrawingPointCommand.
+                    if (vm.ActiveDrawingTool == DrawingToolType.Polygon ||
+                        vm.ActiveDrawingTool == DrawingToolType.Text ||
+                        vm.ActiveDrawingTool == DrawingToolType.Circle || // Assuming previous tools still use this
+                        vm.ActiveDrawingTool == DrawingToolType.Line ||   // Assuming previous tools still use this
+                        vm.ActiveDrawingTool == DrawingToolType.Crosshair)
+                    {
+                        if (vm.AddDrawingPointCommand.CanExecute(mousePosition))
+                        {
+                            vm.AddDrawingPointCommand.Execute(mousePosition);
+                        }
+                        e.Handled = true;
+                    }
+                    // Potentially other non-drawing related interactions if a tool is active but doesn't use AddDrawingPoint.
+                }
+                else if (vm.ActiveMeasurementTool != MeasurementToolType.None)
+                {
+                    if (vm.AddMeasurementPointCommand.CanExecute(mousePosition))
+                    {
+                        vm.AddMeasurementPointCommand.Execute(mousePosition);
+                    }
+                    e.Handled = true;
+                }
+                // Only initiate dragging if no drawing or measurement tool is active and in simulation mode
+                else if (vm.CurrentDisplayMode == CameraMode.Simulation)
+                {
+                    _lastMousePosition = mousePosition;
+                    _isDragging = true;
+                    Mouse.Capture(this);
+                    e.Handled = true;
+                }
             }
         }
 
@@ -159,6 +191,31 @@ namespace MicroLedSimulator.Controls.CameraFrameControl
                 _isDragging = false;
                 Mouse.Capture(null);
                 e.Handled = true;
+            }
+        }
+
+        protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseRightButtonDown(e);
+            if (DataContext is CameraFrameControlViewModel vm)
+            {
+                if (vm.ActiveDrawingTool == DrawingToolType.Polygon)
+                {
+                    if (vm.CompletePolygonCommand.CanExecute(null))
+                    {
+                        vm.CompletePolygonCommand.Execute(null);
+                    }
+                    e.Handled = true;
+                }
+                else if (vm.ActiveMeasurementTool == MeasurementToolType.Area)
+                {
+                    if (vm.CompleteAreaMeasurementCommand.CanExecute(null))
+                    {
+                        vm.CompleteAreaMeasurementCommand.Execute(null);
+                    }
+                    e.Handled = true;
+                }
+                // Potentially other right-click actions for other tools or context menus in the future
             }
         }
     }

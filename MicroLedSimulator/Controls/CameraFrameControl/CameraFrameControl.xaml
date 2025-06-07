@@ -13,9 +13,28 @@
              ClipToBounds="True">
 
     <UserControl.Resources>
+        <Style x:Key="MeasurementTextStyle" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Setter Property="Background" Value="#80000000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="10"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding MeasurementResultText}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding MeasurementResultText, Converter={StaticResource StringIsNullOrEmptyConverter}}" Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <!-- 如果 ModeToVisibilityConverter 還未在 App.xaml 中定義，可以在這裡定義 -->
         <!-- <converters:ModeToVisibilityConverter x:Key="ModeToVisibilityConverter"/> -->
         <!-- 確保 BooleanToVisibilityConverter 也可以被訪問 -->
+        <!-- Make sure StringIsNullOrEmptyConverter is defined in App.xaml or here -->
+        <converters:StringIsNullOrEmptyConverter x:Key="StringIsNullOrEmptyConverter"/>
     </UserControl.Resources>
 
     <UserControl.DataContext>
@@ -27,16 +46,16 @@
             <MenuItem Header="小地圖" IsCheckable="True" IsChecked="{Binding IsMinimapVisible, Mode=OneWay}" Command="{Binding ToggleMinimapVisibilityCommand}"/>
             <Separator />
             <MenuItem Header="繪製標記">
-                <MenuItem Header="畫圓 (待實作)" IsEnabled="False"/>
-                <MenuItem Header="畫線 (待實作)" IsEnabled="False"/>
-                <MenuItem Header="多邊形 (待實作)" IsEnabled="False"/>
-                <MenuItem Header="文字 (待實作)" IsEnabled="False"/>
-                <MenuItem Header="十字線 (待實作)" IsEnabled="False"/>
+                <MenuItem Header="畫圓" IsEnabled="True" Command="{Binding DrawCircleCommand}"/>
+                <MenuItem Header="畫線" IsEnabled="True" Command="{Binding DrawLineCommand}"/>
+                <MenuItem Header="多邊形" IsEnabled="True" Command="{Binding DrawPolygonCommand}"/>
+                <MenuItem Header="文字" IsEnabled="True" Command="{Binding DrawTextCommand}"/>
+                <MenuItem Header="十字線" IsEnabled="True" Command="{Binding DrawCrosshairCommand}"/>
             </MenuItem>
             <MenuItem Header="測量工具">
-                <MenuItem Header="像素距離 (待實作)" IsEnabled="False"/>
-                <MenuItem Header="角度 (待實作)" IsEnabled="False"/>
-                <MenuItem Header="面積 (待實作)" IsEnabled="False"/>
+                <MenuItem Header="像素距離" IsEnabled="True" Command="{Binding MeasurePixelDistanceCommand}"/>
+                <MenuItem Header="角度" IsEnabled="True" Command="{Binding MeasureAngleCommand}"/>
+                <MenuItem Header="面積" IsEnabled="True" Command="{Binding MeasureAreaCommand}"/>
             </MenuItem>
         </ContextMenu>
     </UserControl.ContextMenu>
@@ -87,5 +106,7 @@
                 Visibility="{Binding IsMinimapVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
             <Image x:Name="MinimapImageDisplay" Source="{Binding MinimapSource}" Stretch="Fill" />
         </Border>
+
+        <TextBlock Text="{Binding MeasurementResultText}" Style="{StaticResource MeasurementTextStyle}" />
     </Grid>
 </UserControl>
